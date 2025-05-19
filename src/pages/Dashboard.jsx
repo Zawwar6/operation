@@ -19,37 +19,55 @@ const TOTAL = 30;
 
 const COLORS = ['#22c55e', '#facc15', '#ef4444'];
 
+const categoryStatusData = {
+  miniTrippers: { active: 10, inactive: 3, repair: 2 },
+  dumpers: { active: 14, inactive: 2, repair: 2 },
+  compactors: { active: 6, inactive: 4, repair: 2 },
+  tractors: { active: 7, inactive: 2, repair: 1 },
+  excavators: { active: 4, inactive: 3, repair: 1 },
+};
+
+const generateImageURL = (category, index) => `/images/${category}-${index + 1}.jpg`;
+
 const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState('miniTrippers');
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const generateBarData = () => {
     return Array.from({ length: 30 }, (_, i) => ({
       day: `Day ${i + 1}`,
-      value: Math.floor(Math.random() * 10 + 5) // dummy values
+      value: Math.floor(Math.random() * 10 + 5)
     }));
   };
 
+  const currentStatus = categoryStatusData[selectedCategory];
+
   const pieData = [
-    { name: 'Active', value: 18 },
-    { name: 'Inactive', value: 7 },
-    { name: 'Repair', value: 5 },
+    { name: 'Active', value: currentStatus.active },
+    { name: 'Inactive', value: currentStatus.inactive },
+    { name: 'Repair', value: currentStatus.repair },
   ];
 
-const tableData = Array.from({ length: 30 }, (_, i) => ({
-  id: `#${i + 1}`,
-  name: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} ${i + 1}`,
-  status: i % 3 === 0 ? 'Inactive' : 'Active'  // Har 3rd item inactive, baaki active
-}));
-
+  const tableData = Array.from({ length: 30 }, (_, i) => ({
+    id: `#${i + 1}`,
+    name: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} ${i + 1}`,
+    status: i % 3 === 0 ? 'Inactive' : 'Active',
+    engineNumber: `ENG-${i + 1000}`,
+    chassisNumber: `CHS-${i + 2000}`,
+    image: generateImageURL(selectedCategory, i),
+    description: i % 3 === 0 ? 'Needs maintenance and engine checkup.' : 'Vehicle in good condition.'
+  }));
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {categories.map((cat) => (
           <div
             key={cat.key}
-            onClick={() => setSelectedCategory(cat.key)}
+            onClick={() => {
+              setSelectedCategory(cat.key);
+              setSelectedItem(null);
+            }}
             className={`cursor-pointer bg-white p-6 rounded-lg shadow flex items-center gap-4 transition hover:shadow-lg ${
               selectedCategory === cat.key ? 'ring-2 ring-blue-500' : ''
             }`}
@@ -63,9 +81,7 @@ const tableData = Array.from({ length: 30 }, (_, i) => ({
         ))}
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Bar Chart */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">{categories.find(c => c.key === selectedCategory)?.label} - 30 Day Overview</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -78,7 +94,6 @@ const tableData = Array.from({ length: 30 }, (_, i) => ({
           </ResponsiveContainer>
         </div>
 
-        {/* Pie Chart */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">Status Breakdown</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -102,7 +117,6 @@ const tableData = Array.from({ length: 30 }, (_, i) => ({
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">{categories.find(c => c.key === selectedCategory)?.label} Details</h3>
         <div className="overflow-y-auto max-h-96">
@@ -126,7 +140,10 @@ const tableData = Array.from({ length: 30 }, (_, i) => ({
                     </span>
                   </td>
                   <td className="px-4 py-2">
-                    <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">
+                    <button
+                      className="bg-blue-600 text-white cursor-pointer px-3 py-1 rounded hover:bg-blue-700 transition"
+                      onClick={() => setSelectedItem(item)}
+                    >
                       Description
                     </button>
                   </td>
@@ -136,6 +153,32 @@ const tableData = Array.from({ length: 30 }, (_, i) => ({
           </table>
         </div>
       </div>
+
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-3/4 max-h-[90vh] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <img src={selectedItem.image} alt="Vehicle" className="rounded-lg w-full h-64 object-cover" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-4">{selectedItem.name} Details</h3>
+                <p><strong>ID:</strong> {selectedItem.id}</p>
+                <p><strong>Status:</strong> {selectedItem.status}</p>
+                <p><strong>Engine Number:</strong> {selectedItem.engineNumber}</p>
+                <p><strong>Chassis Number:</strong> {selectedItem.chassisNumber}</p>
+                <p><strong>Description:</strong> {selectedItem.description}</p>
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
