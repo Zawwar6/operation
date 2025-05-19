@@ -26,7 +26,7 @@ const Login = () => {
         password === registeredUser.password
       ) {
         toast.success('Login successful!');
-        localStorage.setItem('loggedIn', true);
+        localStorage.setItem('loggedIn', 'true'); // ✅ fixed
 
         setTimeout(() => {
           navigate('/dashboard');

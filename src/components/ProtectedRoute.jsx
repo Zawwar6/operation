@@ -1,9 +1,9 @@
-// components/PrivateRoute.js
+// components/ProtectedRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('loggedIn'); // simple auth check
+  const isAuthenticated = localStorage.getItem('loggedIn') === 'true'; // Correct check
 
   return isAuthenticated ? children : <Navigate to="/" />;
 };
