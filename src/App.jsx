@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Dumper from './pages/Dumper';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
-import DumperDetails from './pages/DumperDetails';
+
 
 const App = () => {
   return (
@@ -35,16 +35,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-     <Route
-          path="/dumper-details"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <DumperDetails />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+     
       </Routes>
     </Router>
   );
