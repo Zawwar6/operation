@@ -8,7 +8,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [registeredUser, setRegisteredUser] = useState(null); // mock user
+  const [registeredUser, setRegisteredUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -22,17 +22,16 @@ const Login = () => {
       }
 
       if (
-  email === registeredUser.email &&
-  password === registeredUser.password
-) {
-  toast.success('Login successful!');
-  localStorage.setItem('loggedIn', true); // ✅ mark user as logged in
+        email === registeredUser.email &&
+        password === registeredUser.password
+      ) {
+        toast.success('Login successful!');
+        localStorage.setItem('loggedIn', true);
 
-  setTimeout(() => {
-    navigate('/dashboard');
-  }, 1500);
-}
- else {
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
+      } else {
         toast.error('Invalid email or password!');
       }
     } else {
@@ -50,58 +49,58 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
-      <ToastContainer position="top-center" />
-      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8 transition-all duration-300">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4">
+      <ToastContainer position="top-center" theme="dark" />
+      <div className="bg-gray-900 shadow-2xl rounded-2xl w-full max-w-md p-8 transition-all duration-300 border border-gray-700">
         <form className="space-y-4" onSubmit={handleSubmit}>
           {!isLogin && (
             <div>
-              <label className="block text-gray-700 mb-1">Full Name</label>
+              <label className="block text-gray-300 mb-1">Full Name</label>
               <input
                 type="text"
                 placeholder="John Doe"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-gray-700 mb-1">Email Address</label>
+            <label className="block text-gray-300 mb-1">Email Address</label>
             <input
               type="email"
               placeholder="you@fleetx.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-1">Password</label>
+            <label className="block text-gray-300 mb-1">Password</label>
             <input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-700 cursor-pointer text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition duration-300"
+            className="w-full bg-blue-600 cursor-pointer text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
           >
             {isLogin ? 'Login to Dashboard' : 'Create Account'}
           </button>
         </form>
 
-        <p className="text-sm text-center text-gray-600 mt-5">
+        <p className="text-sm text-center text-gray-400 mt-5">
           {isLogin ? "Don't have an account?" : 'Already registered?'}{' '}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-700 font-medium hover:underline cursor-pointer"
+            className="text-blue-400 font-medium hover:underline cursor-pointer"
           >
             {isLogin ? 'Sign up here' : 'Login here'}
           </button>

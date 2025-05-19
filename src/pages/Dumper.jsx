@@ -8,6 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 const initialDumperData = [
   { id: 1, name: 'Dumper Alpha', status: 'Active', type: 'Type A' },
@@ -18,15 +19,21 @@ const initialDumperData = [
 ];
 
 const statusColors = {
-  Active: 'text-green-600',
-  Inactive: 'text-yellow-600',
-  Repair: 'text-red-600',
+  Active: 'text-green-500',
+  Inactive: 'text-yellow-500',
+  Repair: 'text-red-500',
 };
 
 const Dumper = () => {
   const [dumperData, setDumperData] = useState(initialDumperData);
   const [showForm, setShowForm] = useState(false);
   const [newDumper, setNewDumper] = useState({ id: '', name: '', status: '', type: '' });
+
+  const [showDescriptionForm, setShowDescriptionForm] = useState(false);
+  const [selectedDumper, setSelectedDumper] = useState(null);
+  const [descriptionData, setDescriptionData] = useState({ reason: '', description: '', image: null });
+
+  const navigate = useNavigate();
 
   const handleAddDumper = () => {
     if (!newDumper.id || !newDumper.name || !newDumper.status || !newDumper.type) return;
@@ -44,6 +51,47 @@ const Dumper = () => {
   const handleDelete = (id) => {
     const filtered = dumperData.filter((d) => d.id !== id);
     setDumperData(filtered);
+  };
+
+  const handleOpenDescriptionForm = (dumper) => {
+    setSelectedDumper(dumper);
+    setShowDescriptionForm(true);
+  };
+
+  const handleDescriptionSubmit = () => {
+    if (!descriptionData.reason) {
+      alert('Please enter a reason or description!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      navigate('/dumper-details', {
+        state: {
+          dumper: selectedDumper,
+          reason: descriptionData.reason,
+          description: descriptionData.description,
+          image: reader.result,
+        },
+      });
+    };
+
+    if (descriptionData.image) {
+      reader.readAsDataURL(descriptionData.image);
+    } else {
+      navigate('/dumper-details', {
+        state: {
+          dumper: selectedDumper,
+          reason: descriptionData.reason,
+          description: descriptionData.description,
+          image: null,
+        },
+      });
+    }
+
+    setShowDescriptionForm(false);
+    setDescriptionData({ reason: '', description: '', image: null });
+    setSelectedDumper(null);
   };
 
   const statusChartData = ['Active', 'Inactive', 'Repair'].map((status) => ({
@@ -79,38 +127,29 @@ const Dumper = () => {
         {/* Create Dumper Button */}
         <button
           onClick={() => setShowForm(true)}
-          className="mb-4 px-4 py-2 bg-blue-600 cursor-pointer text-white rounded shadow cursor-pointer hover:bg-blue-700"
+          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
         >
           Create Dumper
         </button>
 
         {/* Add Dumper Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 transition-all">
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md space-y-4">
               <h3 className="text-2xl font-bold text-gray-800 border-b pb-3">Create New Dumper</h3>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-600">ID</label>
-                <input
-                  type="number"
-                  placeholder="Enter ID"
-                  value={newDumper.id}
-                  onChange={(e) => setNewDumper({ ...newDumper, id: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-600">Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter Name"
-                  value={newDumper.name}
-                  onChange={(e) => setNewDumper({ ...newDumper, name: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              {['id', 'name', 'type'].map((field) => (
+                <div className="space-y-2" key={field}>
+                  <label className="block text-sm font-medium text-gray-600 capitalize">{field}</label>
+                  <input
+                    type={field === 'id' ? 'number' : 'text'}
+                    placeholder={`Enter ${field}`}
+                    value={newDumper[field]}
+                    onChange={(e) => setNewDumper({ ...newDumper, [field]: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              ))}
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-600">Status</label>
@@ -126,27 +165,16 @@ const Dumper = () => {
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-600">Type</label>
-                <input
-                  type="text"
-                  placeholder="Enter Type"
-                  value={newDumper.type}
-                  onChange={(e) => setNewDumper({ ...newDumper, type: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
               <div className="flex justify-end space-x-2 pt-4">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
+                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddDumper}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   Add Dumper
                 </button>
@@ -155,40 +183,104 @@ const Dumper = () => {
           </div>
         )}
 
-        {/* Table */}
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 font-semibold">
-              <tr>
-                <th className="px-6 py-4">ID</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Actions</th>
+        {/* Description Form Modal */}
+        {showDescriptionForm && selectedDumper && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-gray-900 text-white p-8 rounded-2xl shadow-xl w-full max-w-xl space-y-4">
+              <h3 className="text-2xl font-bold border-b border-gray-700 pb-3">Add Description</h3>
+
+              <p className="text-gray-300">
+                <span className="font-semibold">Dumper:</span> {selectedDumper.name} ({selectedDumper.status})
+              </p>
+
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Reason / Description</label>
+                <textarea
+                  rows={4}
+                  placeholder="Describe the reason or issue..."
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={descriptionData.reason}
+                  onChange={(e) => setDescriptionData({ ...descriptionData, reason: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Detailed Description (optional)</label>
+                <textarea
+                  rows={3}
+                  placeholder="Add detailed points separated by dots."
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={descriptionData.description}
+                  onChange={(e) => setDescriptionData({ ...descriptionData, description: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Upload Image (optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setDescriptionData({ ...descriptionData, image: e.target.files[0] })}
+                  className="w-full text-gray-200"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <button
+                  onClick={() => setShowDescriptionForm(false)}
+                  className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDescriptionSubmit}
+                  className="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dumper Table */}
+        <table className="table-auto w-full border-collapse border border-gray-300 rounded-lg bg-white">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">ID</th>
+              <th className="border border-gray-300 px-4 py-2">Name</th>
+              <th className="border border-gray-300 px-4 py-2">Status</th>
+              <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th className="border border-gray-300 px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dumperData.map((dumper) => (
+              <tr key={dumper.id} className="text-center">
+                <td className="border border-gray-300 px-4 py-2">{dumper.id}</td>
+                <td className="border border-gray-300 px-4 py-2">{dumper.name}</td>
+                <td className={`border border-gray-300 px-4 py-2 font-semibold ${statusColors[dumper.status]}`}>
+                  {dumper.status}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">{dumper.type}</td>
+                <td className="border border-gray-300 px-4 py-2 space-x-2">
+                  <button
+                    onClick={() => handleOpenDescriptionForm(dumper)}
+                    className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Description
+                  </button>
+                  <button
+                    onClick={() => handleDelete(dumper.id)}
+                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {dumperData.map((dumper) => (
-                <tr key={dumper.id}>
-                  <td className="px-6 py-4">{dumper.id}</td>
-                  <td className="px-6 py-4">{dumper.name}</td>
-                  <td className={`px-6 py-4 font-medium ${statusColors[dumper.status]}`}>
-                    {dumper.status}
-                  </td>
-                  <td className="px-6 py-4">{dumper.type}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleDelete(dumper.id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </main>
     </div>
   );
