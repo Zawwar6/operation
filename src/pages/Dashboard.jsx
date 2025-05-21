@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -16,7 +16,6 @@ const categories = [
 ];
 
 const TOTAL = 30;
-
 const COLORS = ['#22c55e', '#facc15', '#ef4444'];
 
 const categoryStatusData = {
@@ -32,6 +31,7 @@ const generateImageURL = (category, index) => `/images/${category}-${index + 1}.
 const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState('miniTrippers');
   const [selectedItem, setSelectedItem] = useState(null);
+  const graphRef = useRef(null); // 👈 Reference for scrolling
 
   const generateBarData = () => {
     return Array.from({ length: 30 }, (_, i) => ({
@@ -58,16 +58,25 @@ const Dashboard = () => {
     description: i % 3 === 0 ? 'Needs maintenance and engine checkup.' : 'Vehicle in good condition.'
   }));
 
+  const handleCategoryClick = (key) => {
+    setSelectedCategory(key);
+    setSelectedItem(null);
+
+    // Scroll to graph on mobile
+    if (window.innerWidth < 768 && graphRef.current) {
+      setTimeout(() => {
+        graphRef.current.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {categories.map((cat) => (
           <div
             key={cat.key}
-            onClick={() => {
-              setSelectedCategory(cat.key);
-              setSelectedItem(null);
-            }}
+            onClick={() => handleCategoryClick(cat.key)}
             className={`cursor-pointer bg-white p-6 rounded-lg shadow flex items-center gap-4 transition hover:shadow-lg ${
               selectedCategory === cat.key ? 'ring-2 ring-blue-500' : ''
             }`}
@@ -81,7 +90,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div ref={graphRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">{categories.find(c => c.key === selectedCategory)?.label} - 30 Day Overview</h3>
           <ResponsiveContainer width="100%" height={300}>
